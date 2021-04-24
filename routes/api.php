@@ -19,5 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/subscribe/{topic}', [NotificationController::class, 'subscribe']);
-Route::post('/publish/{topic}', [NotificationController::class, 'publish']);
+Route::post('/subscribe/{topicId}', [NotificationController::class, 'subscribe']);
+Route::post('/publish/{topicId}', [NotificationController::class, 'publish']);
