@@ -61,6 +61,7 @@ sail artisan db:seed --class=TopicSeeder
 You may interact with the project's endpoints via [Postman](https://www.postman.com/downloads/) or similar tools.
 
 __Endpoints__
+
 ```
 POST /api/subscribe/{topicId}
 Data:
@@ -99,6 +100,7 @@ Response:
 
 
 __PHP Pusher__
+
 Pusher is a hosted API service which makes adding real-time data and functionality to web and mobile applications seamless. Pusher works as a real-time communication layer between the server and the client. It maintains persistent connections at the client using WebSockets, as and when new data is added to your server.
 
 To run this project, you'll need to sign up with [pusher.com](https://pusher.com/) to create an account. It only takes two minutes. On your account dashboard create an app under channels. You'll find the follwing values generated for you which you should then add to your `.env` file.
@@ -116,6 +118,7 @@ PUSHER_APP_CLUSTER=
 Once pusher is set up, you will need to set up client's to establish a websocket connection to the app. The client(s) are the subsccribers who will get notified whenever messages get published to topics.
 
 __Clients__
+
 For the client, I use the pusher.js package to subscribe to topics. Another great alternative I could have used is laravel echo which is a tool that makes it easy to subscribe to channels and listen for events on the channels.
 
 On the client, using pusher.js, I tell the client which channel (topic) to subscribe to, and what event to listen for. So for example a client can subscribe to topic_1 and listen for a MessagePublished event. For this use case, when the client receives published data on the channel from the event, the data is simply logged out to the console.
@@ -156,6 +159,7 @@ The snippet below connects to Channels and subscribes to a channel called topic_
 In your browser, open up the console via your browser's element inspector to view the data being pushed to the client from the websocket server. Use the API "publish" endpoint to publish a message to the websocket server. 
 
 __Unit tests__
+
 I left these out on purpose due to time constraints. I will include these later. Some of the things I would test for include:
 
 + Test if message publishing event is being triggered
