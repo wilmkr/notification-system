@@ -1,62 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Notification System
+This is a simlple demonstration of a publish/subscribe notification system in Laravel. I keep track of topics and subscribers. When a message is published on a topic, all subscribers to that topic get notified almost instantaneously. 
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Key tools/technologies used
++ Laravel 8.1
++ Websockets (pusher PHP server)
++ Events
++ Event listeners
++ Broadcasting
 
-## About Laravel
+## Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+There are different ways to execute this project, I recommend using Laravel sail, a light-weight command-line interface for interacting with Laravel's default Docker development environment. Laravel Sail is supported on macOS, Linux, and Windows. 
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+To get started:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
++ Make sure you have [Composer](https://getcomposer.org/doc/00-intro.md) installed on your computer to manage your dependencies.
++ Download and install [Docker Desktop](https://www.docker.com/)  
++ Clone this repo
++ Cd in the application folder then [setup laravel sail](https://laravel.com/docs/8.x/sail) for the application. Once laravel sail is setup, you can then run `sail up` command to start up your docker containers. 
 
-## Learning Laravel
+```
+cd notification-system
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+composer require laravel/sail --dev
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+./vendor/bin/sail up -d
+`````
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+The first time you run the `sail up` command, Sail's application containers will be built on your machine. This could take several minutes. Subsequent attempts to start Sail will be much faster. Once the application's containers have been started, install the project's dependencies.
 
-### Premium Partners
+```
+sail composer install
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+`````
 
-## Contributing
+__Database__
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The application's `docker-compose.yml` file contains an entry for a MySQL container. This container uses a Docker volume so that the data stored in your database is persisted even when stopping and restarting your containers. In addition, when the MySQL container is starting, it will ensure a database exists whose name matches the value of your `DB_DATABASE` environment variable.
 
-## Code of Conduct
+Once you have started your containers, you may connect to the MySQL instance using a database client by setting your `DB_HOST` environment variable within your application's `.env` file to `mysql`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE={database name}
+DB_USERNAME={username}
+DB_PASSWORD={password}
+`````
 
-## Security Vulnerabilities
+After connecting to the database, run the application's database migrations to create the required database tables. You should also seed the topics table.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+sail artisan migrate
 
-## License
+sail artisan db:seed --class=TopicSeeder
+`````
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+You may interact with the project's endpoints via [Postman](https://www.postman.com/downloads/) or similar tools.
+
+__Endpoints__
+```
+POST /api/subscribe/{topicId}
+Data:
+{
+	"url" : "http://mysubscriber.test"
+}
+
+Response:
+{
+    "success": true,
+    "status_code": 200,
+    "message": "Subscribed",
+    "data": {
+        "url": "http://mysubscriber.test",
+        "topic": "topic_3"
+    }
+}
+
+POST /api/publish/{topicId}
+Data:
+{
+	"message" : "hello world!"
+}
+
+Response:
+{
+    "success": true,
+    "status_code": 200,
+    "message": "Message published",
+    "data": {
+        "message": "foo bar",
+        "topic": "topic_1"
+    }
+}
+`````
+
+
+__PHP Pusher__
+Pusher is a hosted API service which makes adding real-time data and functionality to web and mobile applications seamless. Pusher works as a real-time communication layer between the server and the client. It maintains persistent connections at the client using WebSockets, as and when new data is added to your server.
+
+To run this project, you'll need to sign up with [pusher.com](https://pusher.com/) to create an account. It only takes two minutes. On your account dashboard create an app under channels. You'll find the follwing values generated for you which you should then add to your `.env` file.
+
+```
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=
+
+`````
+
+## Usage
+
+Once pusher is set up, you will need to set up client's to establish a websocket connection to the app. The client(s) are the subsccribers who will get notified whenever messages get published to topics.
+
+__Clients__
+For the client, I use the pusher.js package to subscribe to topics. Another great alternative I could have used is laravel echo which is a tool that makes it easy to subscribe to channels and listen for events on the channels.
+
+On the client, using pusher.js, I tell the client which channel (topic) to subscribe to, and what event to listen for. So for example a client can subscribe to topic_1 and listen for a MessagePublished event. For this use case, when the client receives published data on the channel from the event, the data is simply logged out to the console.
+
+The snippet below connects to Channels and subscribes to a channel called topic_1, listening for the MessagePublished event. Create the index.html file on your system and paste the content below into it to test. Replace PUSHER_APP_ID and PUSHER_APP_CLUSTER with the actual values from your pusher account dashboard.
+
+
+```
+<!DOCTYPE html>
+<head>
+  <title>Pusher Test</title>
+  <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+  <script>
+
+    // Enable pusher logging - don't include this in production
+    Pusher.logToConsole = true;
+
+    var pusher = new Pusher('{PUSHER_APP_ID}', {
+      cluster: '{PUSHER_APP_CLUSTER}'
+    });
+
+    var channel = pusher.subscribe('topic_1');
+    channel.bind('MessagePublished', function(data) {
+      alert(JSON.stringify(data));
+    });
+  </script>
+</head>
+<body>
+  <h1>Pusher Test</h1>
+  <p>
+    Try publishing an event to channel <code>my-channel</code>
+    with event name <code>my-event</code>.
+  </p>
+</body>
+
+`````
+
+In your browser, open up the console via your browser's element inspector to view the data being pushed to the client from the websocket server. Use the API "publish" endpoint to publish a message to the websocket server. 
+
+__Unit tests__
+I left these out on purpose due to time constraints. I will include these later. Some of the things I would test for include:
+
++ Test if message publishing event is being triggered
++ Test if message is actually published to channel when event is triggered
++ Test if event listener is called when event is triggered and that the listener is actually handling the event
+
