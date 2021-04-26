@@ -166,3 +166,10 @@ I left these out on purpose due to time constraints. I will include these later.
 + Test if message is actually published to channel when event is triggered
 + Test if event listener is called when event is triggered and that the listener is actually handling the event
 
+__Notes__
+
+Due to the context and time constraint, I didn’t handle API errors and exceptions such as invalid routes, 404, etc. In a full fledged production app, I always handle these in app/Exceptions/Handler.php.
+
+Also I could have documented the endpoints with an API documentation tool such as swagger.
+
+
